@@ -19,5 +19,5 @@ Board
 
 
 # TO DO
- - Currently the valid move check doesn't check if a piece is blocking
+ - Thorough testing to check if there's still edge cases for move validation
  - Move Generation function to generate all possible move in a given turn
