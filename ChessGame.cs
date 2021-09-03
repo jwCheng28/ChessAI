@@ -1,27 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Collections;
+using ChessPieces;
 
 namespace ChessGame
 {
-    public class PieceAttributes
-    {
-        public const int Empty = 0, Pawn = 1, Knight = 2, Bishop = 3, Rook = 4, Queen = 5, King = 6;
-        public const int Black = 1, White = 2;
-    }
-
-    public struct ChessPiece
-    {
-        public int pieceRank;
-        public int pieceColor;
-
-        public ChessPiece(int pieceRank, int pieceColor)
-        {
-            this.pieceRank = pieceRank;
-            this.pieceColor = pieceColor;
-        }
-    }
-
     public class Board
     {
         private List<ChessPiece> board;
@@ -81,7 +64,23 @@ namespace ChessGame
             }
         }
 
-    }
+        public bool ValidMove(int piecePosition, int targetPosition)
+        {
+            if (board[piecePosition].pieceRank == PieceAttributes.Empty)
+            {
+                Console.Write("There's no piece at that position");
+                return false;
+            }
+            if (PieceMovement.ValidMove(board[piecePosition], piecePosition, targetPosition))
+            {
+                Console.Write("Valid Move");
+                board[targetPosition] = board[piecePosition];
+                board[piecePosition] = new ChessPiece(PieceAttributes.Empty, PieceAttributes.Empty);
+                return true;
+            }
+            return false;
+        }
 
+    }
 
 }
