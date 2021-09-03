@@ -25,48 +25,89 @@ namespace ChessPieces
 
     public static class PieceMovement
     {
-        static private bool PawnMove(int pieceColor, int currentPosition, int targetPosition)
+        static private List<int> PawnMove(int pieceColor, int currentPosition, int targetPosition)
         {
-            if (pieceColor == PieceAttributes.Black)
+            if ((pieceColor == PieceAttributes.Black && (targetPosition - currentPosition) == 8) ||
+                (pieceColor == PieceAttributes.White && (targetPosition - currentPosition) == -8))
             {
-                return (targetPosition - currentPosition) == 8;
+                return new List<int>() {currentPosition, targetPosition};
             }
-            else if (pieceColor == PieceAttributes.White)
-            {
-                return (targetPosition - currentPosition) == -8;
-            }
-            return false;
+            return new List<int>() {};
         }
 
-        static private bool KnightMove(int currentPosition, int targetPosition)
+        static private List<int> KnightMove(int currentPosition, int targetPosition)
         {
             HashSet<int> possiblePositionDeltas = new HashSet<int>() {-17, -15, -10, -6, 6, 10, 15, 17};
-            return possiblePositionDeltas.Contains(targetPosition - currentPosition);
+            if (possiblePositionDeltas.Contains(targetPosition - currentPosition))
+            {
+                return new List<int>() {currentPosition, targetPosition};
+            }
+            return new List<int>() {};
         }
 
-        static private bool BishopMove(int currentPosition, int targetPosition)
+        static private List<int> BishopMove(int currentPosition, int targetPosition)
         {
             int delta = targetPosition - currentPosition;
-            return delta % 7 == 0 || delta % 9 == 0; 
+            int start = Math.Min(targetPosition, currentPosition);
+            int end = Math.Max(targetPosition, currentPosition);
+            List<int> path = new List<int>();
+            if (delta % 7 == 0)
+            {
+                for (int i = start; i <= end; i += 7)
+                {
+                    path.Add(i);
+                }
+            }
+            else if (delta % 9 == 0)
+            {
+                for (int i = start; i <= end; i += 9)
+                {
+                    path.Add(i);
+                }
+            }
+            return path;
         }
 
-        static private bool RookMove(int currentPosition, int targetPosition)
+        static private List<int> RookMove(int currentPosition, int targetPosition)
         {
-            return (targetPosition - currentPosition) % 8 == 0 || targetPosition/8 == currentPosition/8;
+            int start = Math.Min(targetPosition, currentPosition);
+            int end = Math.Max(targetPosition, currentPosition);
+            List<int> path = new List<int>();
+            if (currentPosition % 8 == targetPosition % 8)
+            {
+                for (int i = start; i <= end; i+=8)
+                {
+                    path.Add(i);
+                }
+            }
+            else if (currentPosition/8 == targetPosition/8)
+            {
+                for (int i = start; i <= end; ++i)
+                {
+                    path.Add(i);
+                }
+            }
+            return path;
         }
 
-        static private bool QueenMove(int currentPosition, int targetPosition)
+        static private List<int> QueenMove(int currentPosition, int targetPosition)
         {
-            return BishopMove(currentPosition, targetPosition) || RookMove(currentPosition, targetPosition);
+            List<int> bishopPath = BishopMove(currentPosition, targetPosition);
+            List<int> rookPath = RookMove(currentPosition, targetPosition);
+            return bishopPath.Count > 0 ? bishopPath : rookPath;
         }
 
-        static private bool KingMove(int currentPosition, int targetPosition)
+        static private List<int> KingMove(int currentPosition, int targetPosition)
         {
             HashSet<int> possiblePositionDeltas = new HashSet<int>() {-9, -8, -7, -1, 1, 7, 8, 9};
-            return possiblePositionDeltas.Contains(targetPosition - currentPosition);
+            if (possiblePositionDeltas.Contains(targetPosition - currentPosition))
+            {
+                return new List<int>() {currentPosition, targetPosition};
+            }
+            return new List<int>() {};
         }
 
-        static public bool ValidMove(ChessPiece currentPiece, int currentPosition, int targetPosition)
+        static public List<int> ValidMove(ChessPiece currentPiece, int currentPosition, int targetPosition)
         {
             if (currentPiece.pieceRank == PieceAttributes.Pawn)
             {
@@ -94,7 +135,7 @@ namespace ChessPieces
             }
             else
             {
-                return false;
+                return new List<int>() {};
             }
         }
     }
