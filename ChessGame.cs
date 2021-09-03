@@ -138,15 +138,24 @@ namespace ChessGame
                 Console.WriteLine("There's no piece at that position");
                 return false;
             }
-            if (PieceMovement.ValidMove(board[piecePosition], piecePosition, targetPosition))
+            List<int> movePath = PieceMovement.ValidMove(board[piecePosition], piecePosition, targetPosition);
+            if (board[piecePosition].pieceColor == board[targetPosition].pieceColor || movePath.Count == 0)
             {
-                board[targetPosition] = board[piecePosition];
-                board[piecePosition] = new ChessPiece(PieceAttributes.Empty, PieceAttributes.Empty);
-                UpdateFEN();
-                return true;
+                Console.WriteLine("Invalid Move");
+                return false;
             }
-            Console.WriteLine("Move Invalid");
-            return false;
+            for (int i = 1; i < movePath.Count-1; ++i)
+            {
+                if (board[movePath[i]].pieceRank != PieceAttributes.Empty)
+                {
+                    Console.WriteLine("Invalid Move");
+                    return false;
+                }
+            }
+            board[targetPosition] = board[piecePosition];
+            board[piecePosition] = new ChessPiece(PieceAttributes.Empty, PieceAttributes.Empty);
+            UpdateFEN();
+            return true;
         }
 
     }
