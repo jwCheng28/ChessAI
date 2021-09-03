@@ -1,0 +1,23 @@
+# Program Structure
+
+ChessPiece
+    - Have a var that indicates piece type.
+    - Have a var that indicates piece color.
+
+PieceMovement
+    - Have a function that checks if a move is valid for the selected piece.
+    - Numbers used for checking are found by the possible position deltas shown as follow.
+        |   |   |   |-17|   |-15|   |   |
+        |   |   |-10| -9| -8| -7| -6|   |
+        |   |   |   | -1| c | +1|   |   |
+        |   |   | +6| +7| +8| +9|+10|   |
+        |   |   |   |+15|   |+17|   |   |
+
+Board
+    - Matrix of ChessPiece.
+    - Build the initial matrix thru FEN.
+
+
+# TO DO
+ - Currently the valid move check doesn't check if a piece is blocking
+ - Move Generation function to generate all possible move in a given turn
