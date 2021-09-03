@@ -9,6 +9,8 @@ namespace ChessAI
         {
             Board board = new Board();
             board.DisplayBoard();
+            board.ValidMove(0, 16);
+            board.DisplayBoard();
         }
     }
 }
