@@ -23,7 +23,7 @@ namespace ChessPieces
         }
     }
 
-    public class PieceMovement
+    public static class PieceMovement
     {
         static private bool PawnMove(int pieceColor, int currentPosition, int targetPosition)
         {
