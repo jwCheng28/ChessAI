@@ -9,14 +9,20 @@ namespace ChessGame
     {
         private List<ChessPiece> board;
         private string currentPositionFEN;
+        private string previousPositionFEN;
+
         private static readonly Hashtable pieceTranslation = new Hashtable() {
-                {'p', PieceAttributes.Pawn}, {'n', PieceAttributes.Knight}, {'b', PieceAttributes.Bishop},
-                {'r', PieceAttributes.Rook}, {'q', PieceAttributes.Queen}, {'k', PieceAttributes.King}
+            {'p', PieceAttributes.Pawn}, {'n', PieceAttributes.Knight}, {'b', PieceAttributes.Bishop},
+            {'r', PieceAttributes.Rook}, {'q', PieceAttributes.Queen}, {'k', PieceAttributes.King}
         };
         private static readonly Hashtable pieceReverseTranslation = new Hashtable() {
             {PieceAttributes.Pawn, 'p'}, {PieceAttributes.Knight, 'n'}, {PieceAttributes.Bishop, 'b'},
             {PieceAttributes.Rook, 'r'}, {PieceAttributes.Queen, 'q'}, {PieceAttributes.King, 'k'}
         };
+
+        private Hashtable blackPieceCount;       
+        private Hashtable whitePieceCount;
+        private Hashtable pieceCount;
 
         public Board() : this("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR")
         {
@@ -24,6 +30,24 @@ namespace ChessGame
 
         public Board(string FEN)
         {
+            InitializeChessBoard(FEN);
+        }
+
+        private void InitializeChessBoard(string FEN)
+        {
+            blackPieceCount = new Hashtable() {
+                {PieceAttributes.Pawn, 0}, {PieceAttributes.Knight, 0}, {PieceAttributes.Bishop, 0},
+                {PieceAttributes.Rook, 0}, {PieceAttributes.Queen, 0}, {PieceAttributes.King, 0}
+            };
+            whitePieceCount = new Hashtable() {
+                {PieceAttributes.Pawn, 0}, {PieceAttributes.Knight, 0}, {PieceAttributes.Bishop, 0},
+                {PieceAttributes.Rook, 0}, {PieceAttributes.Queen, 0}, {PieceAttributes.King, 0}
+            };
+            pieceCount = new Hashtable() {
+                {PieceAttributes.Black, blackPieceCount},
+                {PieceAttributes.White, whitePieceCount}
+            };
+            previousPositionFEN = FEN;
             currentPositionFEN = FEN;
             board = new List<ChessPiece>(64);
             foreach (char piece in FEN)
@@ -42,7 +66,9 @@ namespace ChessGame
                 }
                 else
                 {
-                    board.Add(GetChessPieceFromFEN(piece));
+                    ChessPiece currentChessPiece = GetChessPieceFromFEN(piece);
+                    ((Hashtable) pieceCount[currentChessPiece.pieceColor])[currentChessPiece.pieceRank] = (int) ((Hashtable) pieceCount[currentChessPiece.pieceColor])[currentChessPiece.pieceRank] + 1;
+                    board.Add(currentChessPiece);
                 }
             }
         }
@@ -89,6 +115,7 @@ namespace ChessGame
                     spaceCount = 0;
                 }
             }
+            previousPositionFEN = currentPositionFEN;
             currentPositionFEN = string.Join("", FEN);
         }
 
@@ -152,12 +179,41 @@ namespace ChessGame
                     return false;
                 }
             }
-            board[targetPosition] = board[piecePosition];
-            board[piecePosition] = new ChessPiece(PieceAttributes.Empty, PieceAttributes.Empty);
-            UpdateFEN();
             return true;
         }
 
-    }
+        public void MovePiece(int piecePosition, int targetPosition)
+        {
+            if (ValidMove(piecePosition, targetPosition))
+            {
+                if (board[targetPosition].pieceRank != PieceAttributes.Empty)
+                {
+                    ((Hashtable) pieceCount[board[targetPosition].pieceColor])[board[targetPosition].pieceRank] = (int) ((Hashtable) pieceCount[board[targetPosition].pieceColor])[board[targetPosition].pieceRank] - 1;
+                }
+                board[targetPosition] = board[piecePosition];
+                board[piecePosition] = new ChessPiece(PieceAttributes.Empty, PieceAttributes.Empty);
+                UpdateFEN();
+            }
+        }
 
+        // Can only undo once
+        public void UndoPreviousMove()
+        {
+            InitializeChessBoard(previousPositionFEN);
+        }
+
+        public int EvaluatePositionScore()
+        {
+            int positionScore = 0;
+            foreach (DictionaryEntry pieceRemain in blackPieceCount)
+            {
+                positionScore -= (int) PieceAttributes.pieceValue[pieceRemain.Key] * (int) pieceRemain.Value;
+            }
+            foreach (DictionaryEntry pieceRemain in whitePieceCount)
+            {
+                positionScore += (int) PieceAttributes.pieceValue[pieceRemain.Key] * (int) pieceRemain.Value;
+            }
+            return positionScore;
+        }
+    }
 }
