@@ -20,4 +20,6 @@ Board
 
 # TO DO
  - Thorough testing to check if there's still edge cases for move validation
- - Move Generation function to generate all possible move in a given turn
+ - Validation Function returns piece "walk path" if move is valid; don't know if this is the best way for validation
+ - Minimax Algo doesn't seem to work correctly??
+ - Minimax Algo very slow
