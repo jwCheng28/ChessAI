@@ -9,6 +9,11 @@ namespace ChessPieces
         public const int Empty = 0;
         public const int Pawn = 1, Knight = 2, Bishop = 3, Rook = 4, Queen = 5, King = 6;
         public const int Black = 1, White = 2;
+        // Standard Valuation (from Wikipedia); King is technically INF but using 100 makes thing easier
+        public static readonly Hashtable pieceValue = new Hashtable() {
+            {PieceAttributes.Pawn, 1}, {PieceAttributes.Knight, 3}, {PieceAttributes.Bishop, 3},
+            {PieceAttributes.Rook, 5}, {PieceAttributes.Queen, 9}, {PieceAttributes.King, 100}
+        };
     }
 
     public struct ChessPiece
