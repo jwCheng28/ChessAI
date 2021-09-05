@@ -67,7 +67,9 @@ namespace ChessGame
                 else
                 {
                     ChessPiece currentChessPiece = GetChessPieceFromFEN(piece);
-                    ((Hashtable) pieceCount[currentChessPiece.pieceColor])[currentChessPiece.pieceRank] = (int) ((Hashtable) pieceCount[currentChessPiece.pieceColor])[currentChessPiece.pieceRank] + 1;
+                    int currentColor = currentChessPiece.pieceColor;
+                    int currentRank = currentChessPiece.pieceRank;
+                    ((Hashtable) pieceCount[currentColor])[currentRank] = (int) ((Hashtable) pieceCount[currentColor])[currentRank] + 1;
                     board.Add(currentChessPiece);
                 }
             }
@@ -119,6 +121,21 @@ namespace ChessGame
             currentPositionFEN = string.Join("", FEN);
         }
 
+        public List<ChessPiece> GetBoard()
+        {
+            return board;
+        }
+        
+        public void SetChessPiece(int pieceIndex, ChessPiece targetPiece)
+        {
+            board[pieceIndex] = targetPiece;
+        }
+
+        public string GetFEN()
+        {
+            return currentPositionFEN;
+        }
+
         public void DisplayBoard()
         {
             Console.WriteLine("\n------------------------");
@@ -158,48 +175,55 @@ namespace ChessGame
             Console.WriteLine("\n------------------------");
         }
 
-        public bool ValidMove(int piecePosition, int targetPosition)
+        public bool ValidMove(int piecePosition, int targetPosition, bool surpressMessage)
         {
             if (board[piecePosition].pieceRank == PieceAttributes.Empty)
             {
-                Console.WriteLine("There's no piece at that position");
+                if (surpressMessage == false)
+                {
+                    Console.WriteLine("There's no piece at that position");
+                }
                 return false;
             }
             List<int> movePath = PieceMovement.ValidMove(board[piecePosition], piecePosition, targetPosition);
             if (board[piecePosition].pieceColor == board[targetPosition].pieceColor || movePath.Count == 0)
             {
-                Console.WriteLine("Invalid Move");
+                if (surpressMessage == false)
+                {
+                    Console.WriteLine("Invalid Move");
+                }
                 return false;
             }
             for (int i = 1; i < movePath.Count-1; ++i)
             {
                 if (board[movePath[i]].pieceRank != PieceAttributes.Empty)
                 {
-                    Console.WriteLine("Invalid Move");
+                    if (surpressMessage == false)
+                    {
+                        Console.WriteLine("Invalid Move");
+                    }
                     return false;
                 }
             }
             return true;
         }
 
-        public void MovePiece(int piecePosition, int targetPosition)
+        public bool MovePiece(int piecePosition, int targetPosition, bool surpressMessage=false)
         {
-            if (ValidMove(piecePosition, targetPosition))
+            if (ValidMove(piecePosition, targetPosition, surpressMessage))
             {
                 if (board[targetPosition].pieceRank != PieceAttributes.Empty)
                 {
-                    ((Hashtable) pieceCount[board[targetPosition].pieceColor])[board[targetPosition].pieceRank] = (int) ((Hashtable) pieceCount[board[targetPosition].pieceColor])[board[targetPosition].pieceRank] - 1;
+                    int targetColor = board[targetPosition].pieceColor;
+                    int targetRank = board[targetPosition].pieceRank;
+                    ((Hashtable) pieceCount[targetColor])[targetRank] = (int) ((Hashtable) pieceCount[targetColor])[targetRank] - 1;
                 }
                 board[targetPosition] = board[piecePosition];
                 board[piecePosition] = new ChessPiece(PieceAttributes.Empty, PieceAttributes.Empty);
                 UpdateFEN();
+                return true;
             }
-        }
-
-        // Can only undo once
-        public void UndoPreviousMove()
-        {
-            InitializeChessBoard(previousPositionFEN);
+            return false;
         }
 
         public int EvaluatePositionScore()
