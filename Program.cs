@@ -17,9 +17,10 @@ namespace ChessAI
                 start = Convert.ToInt32(Console.ReadLine());
                 Console.WriteLine("Enter target location");
                 end = Convert.ToInt32(Console.ReadLine());
-                board.ValidMove(start, end);
+                board.MovePiece(start, end);
                 Console.WriteLine("");
                 board.DisplayFEN();
+                Console.WriteLine($"Position Score: {board.EvaluatePositionScore()}");
             }
         }
     }
