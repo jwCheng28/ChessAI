@@ -13,6 +13,9 @@ To run the current progress just clone and run `dotnet run` in the terminal (Nee
  - Implemented the Chess AI with Minimax 
  - !Doing Right Now! : Optimization with alpha-beta pruning
 
+## How it Currently Looks Like
+![alt text](https://github.com/jwCheng28/ChessAI/blob/main/img/test.png?raw=true)
+
 ## Unimplemented Chess Rules (as of now)
  - Can't Castle
  - Pawns currently don't "take" diagonally
