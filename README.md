@@ -1,5 +1,5 @@
 # ChessAI
-This project is for me to play around & learn about how to create a chess AI using minimax and beta pruning. 
+This project is for me to play around & learn about how to create a chess AI using minimax and alpha-beta pruning. 
 In the future, I might create a GUI for this project; but as of now, the goal is that the user will simply paste in the FEN of the current position and the best move will be calculated.
 
 ## How to Run
@@ -10,7 +10,8 @@ To run the current progress just clone and run `dotnet run` in the terminal (Nee
 ## Current Progress
  - Able to generate a board from FEN
  - Able to move chess pieces correctly (Validation function might be a little slow??)
- - !Doing Right Now! : Writing the Chess AI using minimax
+ - Implemented the Chess AI with Minimax 
+ - !Doing Right Now! : Optimization with alpha-beta pruning
 
 ## Unimplemented Chess Rules (as of now)
  - Can't Castle
