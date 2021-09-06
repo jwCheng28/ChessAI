@@ -77,7 +77,7 @@ namespace Player
             initialSearchDepth = searchDepth;
             color = botColor;
             searchBestMove(board, botColor, searchDepth);
-            Console.WriteLine($"Score: {bestScore} From ({bestStartLocation.row}, {bestStartLocation.column}) to ({bestEndLocation.row}, {bestEndLocation.column})");
+            // Console.WriteLine($"Score: {bestScore} From ({bestStartLocation.row}, {bestStartLocation.column}) to ({bestEndLocation.row}, {bestEndLocation.column})");
             return new List<Location>() {bestStartLocation, bestEndLocation};
         }
     }
