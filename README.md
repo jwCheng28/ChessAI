@@ -9,7 +9,7 @@ To run the current progress just clone and run `dotnet run` in the terminal (Nee
 
 ## Current Progress
  - Able to generate a board from FEN
- - Able to move chess pieces correctly (Validation function might be a little slow??)
+ - Able to move chess pieces correctly
  - Implemented the Chess AI with Minimax 
  - !Doing Right Now! : Optimization with alpha-beta pruning
 
