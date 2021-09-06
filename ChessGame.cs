@@ -128,7 +128,20 @@ namespace ChessGame
         
         public void SetChessPiece(int pieceIndex, ChessPiece targetPiece)
         {
+            int indexColor = board[pieceIndex].pieceColor;
+            int indexRank = board[pieceIndex].pieceRank;
+            int targetColor = targetPiece.pieceColor;
+            int targetRank = targetPiece.pieceRank;
+            if (indexRank != PieceAttributes.Empty)
+            {
+                ((Hashtable) pieceCount[indexColor])[indexRank] = (int) ((Hashtable) pieceCount[indexColor])[indexRank] - 1;
+            }
+            if (targetRank != PieceAttributes.Empty)
+            {
+                ((Hashtable) pieceCount[targetColor])[targetRank] = (int) ((Hashtable) pieceCount[targetColor])[targetRank] + 1;
+            }
             board[pieceIndex] = targetPiece;
+            UpdateFEN();
         }
 
         public string GetFEN()
@@ -164,7 +177,7 @@ namespace ChessGame
                     int spaces = piece - '0';
                     for (int i = 0; i < spaces; ++i)
                     {
-                        Console.Write("   ");
+                        Console.Write(" - ");
                     }
                 }
                 else
@@ -229,6 +242,7 @@ namespace ChessGame
         public int EvaluatePositionScore()
         {
             int positionScore = 0;
+
             foreach (DictionaryEntry pieceRemain in blackPieceCount)
             {
                 positionScore -= (int) PieceAttributes.pieceValue[pieceRemain.Key] * (int) pieceRemain.Value;
