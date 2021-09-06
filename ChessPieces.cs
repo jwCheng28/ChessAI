@@ -28,119 +28,162 @@ namespace ChessPieces
         }
     }
 
+    public struct Location
+    {
+        public int row;
+        public int column;
+
+        public Location(int row, int column)
+        {
+            this.row = row;
+            this.column = column;
+        }
+    }
+
     public static class PieceMovement
     {
-        static private List<int> PawnMove(int pieceColor, int currentPosition, int targetPosition)
+        static private List<Location> PawnMove(int pieceColor, Location currentLocation, Location targetLocation)
         {
-            if ((pieceColor == PieceAttributes.Black && (targetPosition - currentPosition) == 8) ||
-                (pieceColor == PieceAttributes.White && (targetPosition - currentPosition) == -8))
+            int currentRow = currentLocation.row, currentColumn = currentLocation.column;
+            int targetRow = targetLocation.row, targetColumn = targetLocation.column;
+            if (currentColumn == targetColumn && 
+                 ((pieceColor == PieceAttributes.Black && (targetRow - currentRow) == 1) ||
+                  (pieceColor == PieceAttributes.White && (targetRow - currentRow) == -1))
+               )
             {
-                return new List<int>() {currentPosition, targetPosition};
+                return new List<Location>() {currentLocation, targetLocation};
             }
-            return new List<int>() {};
+            return new List<Location>() {};
         }
 
-        static private List<int> KnightMove(int currentPosition, int targetPosition)
+        static private List<Location> KnightMove(Location currentLocation, Location targetLocation)
         {
-            HashSet<int> possiblePositionDeltas = new HashSet<int>() {-17, -15, -10, -6, 6, 10, 15, 17};
-            if (possiblePositionDeltas.Contains(targetPosition - currentPosition))
+            int currentRow = currentLocation.row, currentColumn = currentLocation.column;
+            int targetRow = targetLocation.row, targetColumn = targetLocation.column;
+            int[,] possibleMovements = new int[,] {
+                {-1, -2}, {-2, -1}, {-2, 1}, {-1, 2},
+                {1, -2}, {2, -1}, {2, 1}, {1, 2}
+            };
+            for (int i = 0; i < possibleMovements.GetLength(0); ++i)
             {
-                return new List<int>() {currentPosition, targetPosition};
-            }
-            return new List<int>() {};
-        }
-
-        static private List<int> BishopMove(int currentPosition, int targetPosition)
-        {
-            int delta = targetPosition - currentPosition;
-            int start = Math.Min(targetPosition, currentPosition);
-            int end = Math.Max(targetPosition, currentPosition);
-            List<int> path = new List<int>();
-            if (delta % 7 == 0)
-            {
-                for (int i = start; i <= end; i += 7)
+                int yMove = possibleMovements[i, 0];
+                int xMove = possibleMovements[i, 1];
+                if (targetRow-currentRow == yMove && targetColumn-currentColumn == xMove)
                 {
-                    path.Add(i);
+                    return new List<Location>() {currentLocation, targetLocation};
                 }
             }
-            else if (delta % 9 == 0)
+            return new List<Location>() {};
+        }
+
+        static private List<Location> BishopMove(Location currentLocation, Location targetLocation)
+        {
+            int currentRow = currentLocation.row, currentColumn = currentLocation.column;
+            int targetRow = targetLocation.row, targetColumn = targetLocation.column;
+            int[,] moveDirections = new int[,] {
+                {-1, -1}, {1, 1},
+                {-1, 1}, {1, -1}
+            };
+            List<Location> path = new List<Location>();
+            for (int i = 0; i < moveDirections.GetLength(0); ++i)
             {
-                for (int i = start; i <= end; i += 9)
+                int currentYDirection = moveDirections[i, 0], currentXDirection = moveDirections[i, 1];
+                int yDelta = targetRow - currentRow, xDelta = targetColumn - currentColumn;
+                int yDeltaAbs = Math.Abs(yDelta), xDeltaAbs = Math.Abs(xDelta);
+                if (yDelta != xDelta)
                 {
-                    path.Add(i);
+                    continue;
+                }
+                int unitYDirection = yDelta / yDeltaAbs, unitXDirection = xDelta/ xDeltaAbs;
+                if (unitYDirection == currentYDirection && unitXDirection == currentXDirection)
+                {
+                    for (int curY = currentRow, curX = currentColumn; 
+                         curY != targetRow && curX != targetColumn; 
+                         curY += unitYDirection, curX += unitXDirection)
+                    {
+                        path.Add(new Location(curY, curX));
+                    }
+                    path.Add(targetLocation);
+                    break;
                 }
             }
             return path;
         }
 
-        static private List<int> RookMove(int currentPosition, int targetPosition)
+        static private List<Location> RookMove(Location currentLocation, Location targetLocation)
         {
-            int start = Math.Min(targetPosition, currentPosition);
-            int end = Math.Max(targetPosition, currentPosition);
-            List<int> path = new List<int>();
-            if (currentPosition % 8 == targetPosition % 8)
+            int currentRow = currentLocation.row, currentColumn = currentLocation.column;
+            int targetRow = targetLocation.row, targetColumn = targetLocation.column;
+            List<Location> path = new List<Location>();
+            if (currentRow == targetRow)
             {
-                for (int i = start; i <= end; i+=8)
+                int startColumn = Math.Min(targetColumn, currentColumn);
+                int endColumn = Math.Max(targetColumn, currentColumn);
+                for (; startColumn <= endColumn; ++startColumn)
                 {
-                    path.Add(i);
+                    path.Add(new Location(currentRow, startColumn));
                 }
             }
-            else if (currentPosition/8 == targetPosition/8)
+            else if (currentColumn == targetColumn)
             {
-                for (int i = start; i <= end; ++i)
+                int startRow = Math.Min(targetRow, currentRow);
+                int endRow = Math.Max(targetRow, currentRow);
+                for (; startRow <= endRow; ++startRow)
                 {
-                    path.Add(i);
+                    path.Add(new Location(startRow, currentColumn));
                 }
             }
             return path;
         }
 
-        static private List<int> QueenMove(int currentPosition, int targetPosition)
+        static private List<Location> QueenMove(Location currentLocation, Location targetLocation)
         {
-            List<int> bishopPath = BishopMove(currentPosition, targetPosition);
-            List<int> rookPath = RookMove(currentPosition, targetPosition);
+            List<Location> bishopPath = BishopMove(currentLocation, targetLocation);
+            List<Location> rookPath = RookMove(currentLocation, targetLocation);
             return bishopPath.Count > 0 ? bishopPath : rookPath;
         }
 
-        static private List<int> KingMove(int currentPosition, int targetPosition)
+        static private List<Location> KingMove(Location currentLocation, Location targetLocation)
         {
-            HashSet<int> possiblePositionDeltas = new HashSet<int>() {-9, -8, -7, -1, 1, 7, 8, 9};
-            if (possiblePositionDeltas.Contains(targetPosition - currentPosition))
+            int currentRow = currentLocation.row, currentColumn = currentLocation.column;
+            int targetRow = targetLocation.row, targetColumn = targetLocation.column;
+            int rowDeltaAbs = Math.Abs(targetRow - currentRow), columnDeltaAbs = Math.Abs(targetColumn - currentColumn);
+            if (rowDeltaAbs <= 1 && columnDeltaAbs <= 1)
             {
-                return new List<int>() {currentPosition, targetPosition};
+                return new List<Location>() {currentLocation, targetLocation};
             }
-            return new List<int>() {};
+            return new List<Location>();
         }
 
-        static public List<int> ValidMove(ChessPiece currentPiece, int currentPosition, int targetPosition)
+        static public List<Location> ValidMove(ChessPiece currentPiece, Location currentLocation, Location targetLocation)
         {
             if (currentPiece.pieceRank == PieceAttributes.Pawn)
             {
-                return PawnMove(currentPiece.pieceColor, currentPosition, targetPosition);
+                return PawnMove(currentPiece.pieceColor, currentLocation, targetLocation);
             }
             else if (currentPiece.pieceRank == PieceAttributes.Knight)
             {
-                return KnightMove(currentPosition, targetPosition);
+                return KnightMove(currentLocation, targetLocation);
             }
             else if (currentPiece.pieceRank == PieceAttributes.Bishop)
             {
-                return BishopMove(currentPosition, targetPosition);
+                return BishopMove(currentLocation, targetLocation);
             }
             else if (currentPiece.pieceRank == PieceAttributes.Rook)
             {
-                return RookMove(currentPosition, targetPosition);
+                return RookMove(currentLocation, targetLocation);
             }
             else if (currentPiece.pieceRank == PieceAttributes.Queen)
             {
-                return QueenMove(currentPosition, targetPosition);
+                return QueenMove(currentLocation, targetLocation);
             }
             else if (currentPiece.pieceRank == PieceAttributes.King)
             {
-                return KingMove(currentPosition, targetPosition);
+                return KingMove(currentLocation, targetLocation);
             }
             else
             {
-                return new List<int>() {};
+                return new List<Location>() {};
             }
         }
     }

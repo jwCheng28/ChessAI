@@ -13,19 +13,28 @@ namespace ChessAI
             Board board = new Board("rnb1k2r/pp3ppp/4pq2/2pp4/3P4/2NB1N2/PPP2PPP/R2QK2R");
             // Board board = new Board();
             board.DisplayFEN();
-            int start, end;
+            int startRow, startCol, endRow, endCol;
             for (int i = 0; i < 5; ++i)
             {
                 Console.WriteLine("");
-                Console.WriteLine("Enter piece location");
-                start = Convert.ToInt32(Console.ReadLine());
-                Console.WriteLine("Enter target location");
-                end = Convert.ToInt32(Console.ReadLine());
-                board.MovePiece(start, end);
+                Console.WriteLine("Enter piece row");
+                startRow = Convert.ToInt32(Console.ReadLine());
+                Console.WriteLine("Enter piece col");
+                startCol = Convert.ToInt32(Console.ReadLine());
+
+                Console.WriteLine("Enter target row");
+                endRow = Convert.ToInt32(Console.ReadLine());
+                Console.WriteLine("Enter target col");
+                endCol = Convert.ToInt32(Console.ReadLine());
+
+                board.MovePiece(new Location(startRow, startCol), new Location(endRow, endCol));
+
                 Console.WriteLine("");
                 board.DisplayFEN();
-                List<int> bestOpponentMove = ChessSearchAI.GetBestMove(board, PieceAttributes.Black, 2);
-                Console.WriteLine($"AI Move: {bestOpponentMove[0]} to {bestOpponentMove[1]}");
+
+                Console.WriteLine("Input Search Depth");
+                int sd = Convert.ToInt32(Console.ReadLine());
+                ChessSearchAI.GetBestMove(board, PieceAttributes.Black, sd);
                 // Console.WriteLine($"Position Score: {board.EvaluatePositionScore()}");
             }
         }

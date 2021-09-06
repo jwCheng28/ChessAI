@@ -7,7 +7,7 @@ namespace ChessGame
 {
     public class Board
     {
-        private List<ChessPiece> board;
+        private ChessPiece[,] board;
         private string currentPositionFEN;
         private string previousPositionFEN;
 
@@ -49,11 +49,14 @@ namespace ChessGame
             };
             previousPositionFEN = FEN;
             currentPositionFEN = FEN;
-            board = new List<ChessPiece>(64);
+            board = new ChessPiece[8, 8];
+            int row = 0, col = 0;
             foreach (char piece in FEN)
             {
                 if (piece.Equals('/'))
                 {
+                    row++;
+                    col = 0;
                     continue;
                 } 
                 else if (Char.IsNumber(piece))
@@ -61,7 +64,8 @@ namespace ChessGame
                     int spaces = piece - '0';
                     for (int i = 0; i < spaces; ++i)
                     {
-                        board.Add(new ChessPiece(PieceAttributes.Empty, PieceAttributes.Empty));
+                        board[row, col] = new ChessPiece(PieceAttributes.Empty, PieceAttributes.Empty);
+                        col++;
                     }
                 }
                 else
@@ -70,7 +74,8 @@ namespace ChessGame
                     int currentColor = currentChessPiece.pieceColor;
                     int currentRank = currentChessPiece.pieceRank;
                     ((Hashtable) pieceCount[currentColor])[currentRank] = (int) ((Hashtable) pieceCount[currentColor])[currentRank] + 1;
-                    board.Add(currentChessPiece);
+                    board[row, col] = currentChessPiece;
+                    col++;
                 }
             }
         }
@@ -87,51 +92,52 @@ namespace ChessGame
         {
             List<char> FEN = new List<char>();
             int spaceCount = 0;
-            for (int i = 0; i < 64; ++i)
+            for (int row = 0; row < 8; ++row)
             {
-                if (i != 0 && i%8 == 0)
+                for (int col = 0; col < 8; ++col)
                 {
-                    if (spaceCount > 0)
+                    if (board[row, col].pieceRank == PieceAttributes.Empty)
                     {
-                        FEN.Add((char) ('0' + spaceCount));
+                        spaceCount++;
+                    } 
+                    else 
+                    {
+                        if (spaceCount > 0)
+                        {
+                            FEN.Add((char) ('0' + spaceCount));
+                        }
+                        char piece = (char) pieceReverseTranslation[board[row, col].pieceRank];
+                        if (board[row, col].pieceColor == PieceAttributes.White)
+                        {
+                            piece = Char.ToUpper(piece);
+                        }
+                        FEN.Add(piece);
+                        spaceCount = 0;
                     }
+                }
+                FEN.Add((char) ('0' + spaceCount));
+                if (row != 7)
+                {
                     FEN.Add('/');
-                    spaceCount = 0;
                 }
-                if (board[i].pieceRank == PieceAttributes.Empty)
-                {
-                    spaceCount++;
-                } 
-                else 
-                {
-                    if (spaceCount > 0)
-                    {
-                        FEN.Add((char) ('0' + spaceCount));
-                    }
-                    char piece = (char) pieceReverseTranslation[board[i].pieceRank];
-                    if (board[i].pieceColor == PieceAttributes.White)
-                    {
-                        piece = Char.ToUpper(piece);
-                    }
-                    FEN.Add(piece);
-                    spaceCount = 0;
-                }
+                spaceCount = 0;
             }
             previousPositionFEN = currentPositionFEN;
             currentPositionFEN = string.Join("", FEN);
         }
 
-        public List<ChessPiece> GetBoard()
+        public ChessPiece[,] GetBoard()
         {
             return board;
         }
         
-        public void SetChessPiece(int pieceIndex, ChessPiece targetPiece)
+        public void SetChessPiece(Location pieceLocation, ChessPiece targetPiece)
         {
-            int indexColor = board[pieceIndex].pieceColor;
-            int indexRank = board[pieceIndex].pieceRank;
-            int targetColor = targetPiece.pieceColor;
-            int targetRank = targetPiece.pieceRank;
+            int pieceRow = pieceLocation.row, pieceColumn = pieceLocation.column;
+
+            int indexColor = board[pieceRow, pieceColumn].pieceColor, indexRank = board[pieceRow, pieceColumn].pieceRank;
+            int targetColor = targetPiece.pieceColor, targetRank = targetPiece.pieceRank;
+
             if (indexRank != PieceAttributes.Empty)
             {
                 ((Hashtable) pieceCount[indexColor])[indexRank] = (int) ((Hashtable) pieceCount[indexColor])[indexRank] - 1;
@@ -140,7 +146,7 @@ namespace ChessGame
             {
                 ((Hashtable) pieceCount[targetColor])[targetRank] = (int) ((Hashtable) pieceCount[targetColor])[targetRank] + 1;
             }
-            board[pieceIndex] = targetPiece;
+            board[pieceRow, pieceColumn] = targetPiece;
             UpdateFEN();
         }
 
@@ -152,13 +158,13 @@ namespace ChessGame
         public void DisplayBoard()
         {
             Console.WriteLine("\n------------------------");
-            for (int i = 0; i < 64; ++i) 
+            for (int row = 0; row < 64; ++row)
             {
-                if (i%8 == 0)
+                for (int col = 0; col < 64; ++col)
                 {
-                    Console.WriteLine("");
+                    Console.Write($" {board[row, col].pieceRank} ");
                 }
-                Console.Write($" {board[i].pieceRank} ");
+                Console.WriteLine("");
             }
             Console.WriteLine("\n------------------------");
         }
@@ -188,9 +194,11 @@ namespace ChessGame
             Console.WriteLine("\n------------------------");
         }
 
-        public bool ValidMove(int piecePosition, int targetPosition, bool surpressMessage)
+        public bool ValidMove(Location pieceLocation, Location targetLocation, bool surpressMessage)
         {
-            if (board[piecePosition].pieceRank == PieceAttributes.Empty)
+            int pieceRow = pieceLocation.row, pieceColumn = pieceLocation.column;
+            int targetRow = targetLocation.row, targetColumn = targetLocation.column;
+            if (board[pieceRow, pieceColumn].pieceRank == PieceAttributes.Empty)
             {
                 if (surpressMessage == false)
                 {
@@ -198,8 +206,8 @@ namespace ChessGame
                 }
                 return false;
             }
-            List<int> movePath = PieceMovement.ValidMove(board[piecePosition], piecePosition, targetPosition);
-            if (board[piecePosition].pieceColor == board[targetPosition].pieceColor || movePath.Count == 0)
+            List<Location> movePath = PieceMovement.ValidMove(board[pieceRow, pieceColumn], pieceLocation, targetLocation);
+            if (board[pieceRow, pieceColumn].pieceColor == board[targetRow, targetColumn].pieceColor || movePath.Count == 0)
             {
                 if (surpressMessage == false)
                 {
@@ -209,7 +217,8 @@ namespace ChessGame
             }
             for (int i = 1; i < movePath.Count-1; ++i)
             {
-                if (board[movePath[i]].pieceRank != PieceAttributes.Empty)
+                int row = movePath[i].row, column = movePath[i].column;
+                if (board[row, column].pieceRank != PieceAttributes.Empty)
                 {
                     if (surpressMessage == false)
                     {
@@ -221,18 +230,20 @@ namespace ChessGame
             return true;
         }
 
-        public bool MovePiece(int piecePosition, int targetPosition, bool surpressMessage=false)
+        public bool MovePiece(Location pieceLocation, Location targetLocation, bool surpressMessage=false)
         {
-            if (ValidMove(piecePosition, targetPosition, surpressMessage))
+            if (ValidMove(pieceLocation, targetLocation, surpressMessage))
             {
-                if (board[targetPosition].pieceRank != PieceAttributes.Empty)
+                int pieceRow = pieceLocation.row, pieceColumn = pieceLocation.column;
+                int targetRow = targetLocation.row, targetColumn = targetLocation.column;
+                if (board[targetRow, targetColumn].pieceRank != PieceAttributes.Empty)
                 {
-                    int targetColor = board[targetPosition].pieceColor;
-                    int targetRank = board[targetPosition].pieceRank;
+                    int targetColor = board[targetRow, targetColumn].pieceColor;
+                    int targetRank = board[targetRow, targetColumn].pieceRank;
                     ((Hashtable) pieceCount[targetColor])[targetRank] = (int) ((Hashtable) pieceCount[targetColor])[targetRank] - 1;
                 }
-                board[targetPosition] = board[piecePosition];
-                board[piecePosition] = new ChessPiece(PieceAttributes.Empty, PieceAttributes.Empty);
+                board[targetRow, targetColumn] = board[pieceRow, pieceColumn];
+                board[pieceRow, pieceColumn] = new ChessPiece(PieceAttributes.Empty, PieceAttributes.Empty);
                 UpdateFEN();
                 return true;
             }

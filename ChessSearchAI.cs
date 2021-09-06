@@ -8,22 +8,29 @@ namespace Player
 {
     public static class ChessSearchAI
     {
+        private static int color;
+        private static int bestScore;
+        private static int initialSearchDepth;
+        private static Location bestStartLocation;
+        private static Location bestEndLocation;
+
         private static int OpponentColor(int myColor)
         {
             return myColor == PieceAttributes.White ? PieceAttributes.Black : PieceAttributes.White;
         }
 
-        private static List<int> searchBestMove(Board board, int currentTurnColor, int searchDepth, int currentMoveStart, int currentMoveEnd)
+        private static int searchBestMove(Board board, int currentTurnColor, int searchDepth)
         {
             if (searchDepth == 0)
             {
-                return new List<int>() {board.EvaluatePositionScore(), currentMoveStart, currentMoveEnd};
+                return board.EvaluatePositionScore();
             }
 
-            List<int> bestMove = currentTurnColor == PieceAttributes.Black ? new List<int>() {Int32.MaxValue, -1, -1} : new List<int>() {Int32.MinValue, -1, -1};
+            int bestCurrentScore = currentTurnColor == PieceAttributes.Black ? Int32.MaxValue : Int32.MinValue;
             for (int i = 0; i < 64; ++i)
             {
-                ChessPiece currentPiece = board.GetBoard()[i];
+                int row = i / 8, col = i % 8;
+                ChessPiece currentPiece = board.GetBoard()[row, col];
                 if (currentPiece.pieceColor != currentTurnColor)
                 {
                     continue;
@@ -34,31 +41,44 @@ namespace Player
                     {
                         continue;
                     }
-                    ChessPiece targetPiece = board.GetBoard()[j];
-                    bool valid = board.MovePiece(i, j, true);
+                    int targetRow = j / 8, targetColumn = j % 8;
+                    ChessPiece targetPiece = board.GetBoard()[targetRow, targetColumn];
+                    bool valid = board.MovePiece(new Location(row, col), new Location(targetRow, targetColumn), true);
                     if (valid == false)
                     {
                         continue;
                     }
-                    List<int> currentBestMove = searchBestMove(board, OpponentColor(currentTurnColor), searchDepth-1, i, j);
-                    board.SetChessPiece(i, currentPiece);
-                    board.SetChessPiece(j, targetPiece);
-
-                    if ((currentTurnColor == PieceAttributes.Black && currentBestMove[0] < bestMove[0]) ||
-                       (currentTurnColor == PieceAttributes.White && currentBestMove[0] > bestMove[0]))
+                    int moveEvaluation = searchBestMove(board, OpponentColor(currentTurnColor), searchDepth-1);
+                    board.SetChessPiece(new Location(row, col), currentPiece);
+                    board.SetChessPiece(new Location(targetRow, targetColumn), targetPiece);
+                    if ((currentTurnColor == PieceAttributes.Black && moveEvaluation < bestCurrentScore) ||
+                        (currentTurnColor == PieceAttributes.White && moveEvaluation > bestCurrentScore))
                     {
-                        bestMove[0] = currentBestMove[0];
-                        bestMove[1] = i;
-                        bestMove[2] = j;
+                        bestCurrentScore = moveEvaluation;
+                    }
+
+                    if (searchDepth == initialSearchDepth &&
+                         ((color == PieceAttributes.Black && bestCurrentScore < bestScore) ||
+                          (color == PieceAttributes.White && bestCurrentScore > bestScore))
+                       )
+                    {
+                        bestScore = bestCurrentScore;
+                        bestStartLocation = new Location(row, col);
+                        bestEndLocation = new Location(targetRow, targetColumn);
                     }
                 }
             }
-            return bestMove;
+            return bestCurrentScore;
         }
-
-        public static List<int> GetBestMove(Board board, int botColor, int searchDepth)
+        
+        public static List<Location> GetBestMove(Board board, int botColor, int searchDepth)
         {
-            return searchBestMove(board, botColor, searchDepth, 0, 0).GetRange(1, 2);
+            bestScore = botColor == PieceAttributes.Black ? Int32.MaxValue : Int32.MinValue;
+            initialSearchDepth = searchDepth;
+            color = botColor;
+            searchBestMove(board, botColor, searchDepth);
+            Console.WriteLine($"Score: {bestScore} From ({bestStartLocation.row}, {bestStartLocation.column}) to ({bestEndLocation.row}, {bestEndLocation.column})");
+            return new List<Location>() {bestStartLocation, bestEndLocation};
         }
     }
 }
