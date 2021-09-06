@@ -6,20 +6,27 @@ ChessPiece
 
 PieceMovement
     - Have a function that checks if a move is valid for the selected piece.
-    - Numbers used for checking are found by the possible position deltas shown as follow.
+    - New Implementation uses a 2D array
+
+    /* Old Implementation
+    - Numbers used for validating are found by the possible position deltas shown as follow.
+        Deltas for old implementation (1D-Array for entire board)
+        Removed due to confusing/hacky math for validation
         |   |   |   |-17|   |-15|   |   |
         |   |   |-10| -9| -8| -7| -6|   |
         |   |   |   | -1| c | +1|   |   |
         |   |   | +6| +7| +8| +9|+10|   |
         |   |   |   |+15|   |+17|   |   |
+    */
 
 Board
     - Matrix of ChessPiece.
     - Build the initial matrix thru FEN.
 
+Chess AI
+    - Uses Minimax
 
 # TO DO
  - Thorough testing to check if there's still edge cases for move validation
  - Validation Function returns piece "walk path" if move is valid; don't know if this is the best way for validation
- - Minimax Algo doesn't seem to work correctly??
  - Minimax Algo very slow
