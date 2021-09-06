@@ -115,7 +115,10 @@ namespace ChessGame
                         spaceCount = 0;
                     }
                 }
-                FEN.Add((char) ('0' + spaceCount));
+                if (spaceCount > 0)
+                {
+                    FEN.Add((char) ('0' + spaceCount));
+                }
                 if (row != 7)
                 {
                     FEN.Add('/');
@@ -171,12 +174,26 @@ namespace ChessGame
 
         public void DisplayFEN()
         {
-            Console.WriteLine("\n------------------------");
+            Console.Write("\n   ");
+            for (int col = 0; col < 8; ++col)
+            {
+                Console.Write($" {col} ");
+            }
+            Console.Write("\n   ");
+            for (int col = 0; col < 8; ++col)
+            {
+                Console.Write("---");
+            }
+            int row = 0;
+            Console.Write($"\n{row}| ");
+            row++;
             foreach (char piece in currentPositionFEN)
             {
                 if (piece.Equals('/'))
                 {
                     Console.WriteLine("");
+                    Console.Write($"{row}| ");
+                    row++;
                 }
                 else if (Char.IsDigit(piece))
                 {
@@ -191,7 +208,7 @@ namespace ChessGame
                     Console.Write(" " + piece + " ");
                 }
             }
-            Console.WriteLine("\n------------------------");
+            Console.WriteLine("\n   ------------------------");
         }
 
         public bool ValidMove(Location pieceLocation, Location targetLocation, bool surpressMessage)
