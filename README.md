@@ -12,3 +12,8 @@ To run the current progress just clone and run `dotnet run` in the terminal (Nee
  - Able to move chess pieces correctly (Validation function might be a little slow??)
  - !Doing Right Now! : Writing the Chess AI using minimax
 
+## Unimplemented Chess Rules (as of now)
+ - Can't Castle
+ - Pawns currently don't "take" diagonally
+ - No En Passant
+ - Doesn't detect checks; King can get taken
