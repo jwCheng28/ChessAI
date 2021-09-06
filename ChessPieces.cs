@@ -90,7 +90,7 @@ namespace ChessPieces
                 int currentYDirection = moveDirections[i, 0], currentXDirection = moveDirections[i, 1];
                 int yDelta = targetRow - currentRow, xDelta = targetColumn - currentColumn;
                 int yDeltaAbs = Math.Abs(yDelta), xDeltaAbs = Math.Abs(xDelta);
-                if (yDelta != xDelta)
+                if (yDeltaAbs != xDeltaAbs)
                 {
                     continue;
                 }
